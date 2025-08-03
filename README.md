@@ -82,7 +82,12 @@ npm run dev
 ```
 
 ### Set API Endpoint
-    - Open src/App.tsx and update the API endpoint to match your Flask backend URL.
+- Open src/App.tsx and update the API endpoint to match your Flask backend URL. Change the existed URL to the new URL of allocated GPU Node.
+    
+```
+        const res = await axios.post("http://10.72.191.93:8000/query",
+
+```
 
 
 
