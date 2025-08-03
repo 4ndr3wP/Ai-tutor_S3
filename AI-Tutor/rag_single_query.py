@@ -21,10 +21,9 @@ from fastapi import FastAPI, Request
 
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2,3" ## Setting the visible devices for CUDA
 
 MODEL_NAME = 'microsoft/phi-4'
-# MODEL_NAME = 'microsoft/Phi-4-reasoning-plus'
 EMBEDDING_MODEL = 'nomic-ai/nomic-embed-text-v1.5'
 SIMILARITY_THRESHOLD = 0.55
 BATCH_SIZE = 64
