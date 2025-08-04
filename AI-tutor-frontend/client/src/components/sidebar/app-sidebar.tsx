@@ -1,10 +1,9 @@
 import * as React from "react"
 import {
-  AudioWaveform,
-  Command,
   MessageCircleQuestion,
+  ThumbsUp
 } from "lucide-react"
-
+import { FeedbackModal } from "./FeedbackModal"
 import { NavSecondary } from "@/components/sidebar/nav-secondary"
 import { TeamSwitcher } from "@/components/sidebar/team-switcher"
 import DeakinLogo from "/logo.png"
@@ -25,42 +24,35 @@ const data = {
       isImage: true,
       plan: "Enterprise",
     },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
   ],
   navSecondary: [
     {
       title: "Help",
       url: "#",
       icon: MessageCircleQuestion,
-      onClick: "help", // Custom flag
+      onClick: "help", 
     },
-  ],
-  favorites: [],
-  workspaces: [
     {
-      name: "Help Desk",
-      emoji: "🎨",
+      title: "Feedback for Us",
       url: "#",
+      icon: ThumbsUp,
+      onClick: "feedback", 
     },
   ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isHelpModalOpen, setHelpModalOpen] = React.useState(false)
+  const [isFeedbackModalOpen, setFeedbackModalOpen] = React.useState(false);
 
   const handleNavSecondaryClick = (item: any) => {
     if (item.onClick === "help") {
       setHelpModalOpen(true)
     }
+    if (item.onClick === "feedback") {
+      setFeedbackModalOpen(true)
+    }
+    
   }
 
   return (
@@ -80,6 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </Sidebar>
 
       <HelpModal isOpen={isHelpModalOpen} onClose={() => setHelpModalOpen(false)} />
+      <FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setFeedbackModalOpen(false)} />
     </>
   )
 }

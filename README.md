@@ -47,11 +47,13 @@ AI-Tutor/
 cd AI-Tutor
 
 # Create virtual environment (optional but recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+module load Anaconda3
 
-# Install dependencies
-pip install -r requirements.txt
+conda env create -f environment.yml
+
+source activate
+
+conda activate test_app
 ```
 
 ## Runing RAG pipline 

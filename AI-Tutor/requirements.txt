@@ -1,3 +1,0 @@
-langchain-chroma
-chromadb
-pypdf

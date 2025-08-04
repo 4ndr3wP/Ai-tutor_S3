@@ -4,7 +4,7 @@ import datetime
 import json
 import os
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+# from sklearn.metrics.pairwise import cosine_similarity
 from langchain import LLMChain, PromptTemplate
 from langchain.chains import StuffDocumentsChain , RetrievalQA
 from langchain.vectorstores import Chroma
@@ -21,7 +21,7 @@ from fastapi import FastAPI, Request
 
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2,3" ## Setting the visible devices for CUDA
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" ## Setting the visible devices for CUDA 1 Gpu will be used
 
 MODEL_NAME = 'microsoft/phi-4'
 EMBEDDING_MODEL = 'nomic-ai/nomic-embed-text-v1.5'
@@ -93,7 +93,7 @@ class RAGSystemSingle:
         PERSIST_DIR = './RL_db_reference_1k_500'
         self.llm = VLLM(
             model=MODEL_NAME,
-            tensor_parallel_size=2,
+            tensor_parallel_size=1, # Adjust based on your GPU setup
             trust_remote_code=True,
             max_new_tokens=32000,
             gpu_memory_utilization=0.50

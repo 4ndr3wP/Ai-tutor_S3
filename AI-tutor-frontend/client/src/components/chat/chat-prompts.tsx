@@ -1,7 +1,10 @@
 import { SparklesIcon } from "lucide-react"
 import { Button } from "../ui/button"
+interface ChatPromptsProps {
+    onPromptSelect: (prompt: string) => void;
+  }
 
-function ChatPrompts() {
+function ChatPrompts({ onPromptSelect }: ChatPromptsProps) {
     const prompts: string[] = [
         "Important Questions",
         "Doubts Related to last week Lecture",
@@ -26,7 +29,9 @@ function ChatPrompts() {
                         return <Button
                             key={prompt}
                             className="cursor-pointer font-normal rounded-3xl"
-                            variant="outline">{prompt}</Button>
+                            variant="outline" 
+                            onClick={() => onPromptSelect(prompt)} >{prompt}</Button>
+                            
                     })}
                 </div>
             </div>
