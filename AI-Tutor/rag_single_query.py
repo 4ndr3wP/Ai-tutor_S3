@@ -93,7 +93,9 @@ class SentenceTransformerEmbeddings(Embeddings):
         return self.model.encode(texts, convert_to_numpy=True, device=self.device, batch_size=self.batch_size).tolist()
 
     def embed_query(self, text):
-        return self.model.encode(['search_query: ' + text], convert_to_numpy=True, device=self.device)[0].tolist()
+        embedded = self.model.encode(['search_query: ' + text], convert_to_numpy=True, device=self.device)[0].tolist()
+        print(f"🧮 Embedding query '{text}' -> vector length: {len(embedded)}, first 5 values: {embedded[:5]}")
+        return embedded
 
 class RAGSystemSingle:
     def __init__(self):
@@ -129,18 +131,59 @@ class RAGSystemSingle:
         return top2, avg
 
     def query(self, question, k=5 , session_id=None):
+        print(f"\n🔍 NEW QUERY: '{question}'")
+        print(f"📊 Requesting {k} relevant documents...")
+        
+        # Debug: Check database collection info
+        try:
+            collection = self.vectorstore._collection
+            total_docs = collection.count()
+            print(f"🗄️  Database contains {total_docs} total documents")
+            
+            # Test direct similarity search
+            print(f"🔍 Testing direct similarity search...")
+            direct_docs = self.vectorstore.similarity_search(question, k=k)
+            print(f"📋 Direct search found {len(direct_docs)} documents")
+            
+            if direct_docs:
+                print("📄 First document preview:")
+                doc = direct_docs[0]
+                print(f"   Week: {doc.metadata.get('week', 'Unknown')}")
+                print(f"   Source: {doc.metadata.get('source_file', 'Unknown')}")
+                print(f"   Content: '{doc.page_content[:100]}...'")
+        except Exception as e:
+            print(f"❌ Error accessing database: {e}")
         
         retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})
-
         docs = retriever.get_relevant_documents(question)
-        # context = "\n\n".join([d.page_content for d in docs])
-        # Run RAG chain
+        
+        # Enhanced logging for document retrieval
+        print(f"📚 Retrieved {len(docs)} documents:")
+        for i, doc in enumerate(docs, 1):
+            metadata = doc.metadata
+            week = metadata.get('week', 'Unknown')
+            source = metadata.get('source_file', 'Unknown')
+            print(f"  {i}. Week {week} - {source}")
+            # Show first 150 chars of content
+            content_preview = doc.page_content[:150].replace('\n', ' ')
+            print(f"     Preview: \"{content_preview}...\"")
+        
+        # Show the complete context being sent to Ollama
+        context = "\n\n".join([d.page_content for d in docs])
+        print(f"\n📖 CONTEXT LENGTH: {len(context)} characters")
+        print(f"📝 FULL CONTEXT BEING SENT TO OLLAMA:")
+        print("=" * 80)
+        print(context)
+        print("=" * 80)
 
         rag_chain = RetrievalQA(
             retriever=retriever,
             combine_documents_chain=self.stuff_chain
         )
+        
+        print(f"🤖 Sending to Ollama (phi3 model)...")
         response = rag_chain.run(question)
+        print(f"✅ OLLAMA RESPONSE: '{response}'")
 
         # Similarity metrics
         # print("docs:",  [i.metadata['source_file'] for i in docs])
@@ -161,6 +204,10 @@ class RAGSystemSingle:
         # refs = "\n\nReferences:\n" + "\n".join(f"- {t}" for t in titles)
         # response += refs
 
+        print(f"\n🎯 FINAL RESPONSE LENGTH: {len(response)} characters")
+        print(f"📋 SESSION ID: {session_id}")
+        print(f"💾 Logging interaction to chat_history.json")
+        
         self.log_interaction(question, response, session_id)
         return response
     

@@ -352,5 +352,29 @@
         "session_id": "a121cd15-519a-43ef-87e9-a8e888f93654",
         "user_query": "Why is Sarsa safer than qleaning?",
         "model_response": "The question asked is about the safety of two algorithms: Sarsa and Q-learning. These are machine learning methods, but they have different characteristics.\nIn general terms, it's safe to say that Sarsa provides better safety in some cases than Q-Learning. This does not mean Sarsa will always be safer or Q-Learning is always riskier. It depends on the specific use case and environment where the algorithms are applied. \nHowever, I am unable to provide a list of related weeks or slides from the course material without knowing the particular university unit you're referring to. Could you please clarify for me which specific university unit this question pertains to?\n\n\n"
+    },
+    {
+        "timestamp": "2025-08-07 16:22:50",
+        "session_id": "test-session-apple-silicon",
+        "user_query": "What is reinforcement learning?",
+        "model_response": "Reinforcement Learning (RL) is a type of machine learning where an agent learns to make decisions by taking actions in an environment to maximize some notion of cumulative reward. It's based on the idea that good actions are those that reinforce or increase rewards over time, hence its name.\n\nRelevant material: [week 2]"
+    },
+    {
+        "timestamp": "2025-08-07 16:26:49",
+        "session_id": "7d36bb9d-1469-48e1-a01b-3b0216fa5f91",
+        "user_query": "What is RL?",
+        "model_response": "Reinforcement Learning (RL) is a type of machine learning where an agent learns to make decisions by taking actions in an environment to maximize some notion of cumulative reward. It involves the use of rewards and penalties as signals for guiding behavior towards achieving specific goals, often using techniques like Q-learning or policy gradients.\n\nRelated material: [week 2]"
+    },
+    {
+        "timestamp": "2025-08-07 16:30:30",
+        "session_id": "7d36bb9d-1469-48e1-a01b-3b0216fa5f91",
+        "user_query": "What is RL?",
+        "model_response": "Reinforcement Learning (RL) is a type of machine learning where an agent learns to make decisions by taking actions in an environment to maximize some notion of cumulative reward. It's based on the idea that intelligent behavior can be learned from interacting with its environment and receiving feedback through rewards or penalties for its actions, without being explicitly programmed with a specific strategy.\n\nRelevant material: [week 1]"
+    },
+    {
+        "timestamp": "2025-08-07 16:33:03",
+        "session_id": "7d36bb9d-1469-48e1-a01b-3b0216fa5f91",
+        "user_query": "What is RL?",
+        "model_response": "Reinforcement Learning (RL) is a type of machine learning where an agent learns to make decisions by taking actions in an environment to maximize some notion of cumulative reward. It involves the use of rewards and penalties as signals for guiding behavior towards achieving specific goals through trial-and-error interactions with its surroundings, often using techniques like Q-learning or policy gradients.\n\nRelevant material: [week 3]"
     }
 ]
