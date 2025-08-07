@@ -1,0 +1,5 @@
+# Ignore local development files
+run_local_mac.py
+inspect_db.py
+__pycache__/
+*.log

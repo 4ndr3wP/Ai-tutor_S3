@@ -77,7 +77,8 @@ function App() {
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
 
-      const res = await axios.post("http://10.164.18.48:8000/query", {
+      // const res = await axios.post("http://10.164.18.48:8000/query", { // Original server endpoint
+const res = await axios.post("http://localhost:8000/query", { // Local development endpoint
         query: message,
         size: 5,
         session_id: sessionId,

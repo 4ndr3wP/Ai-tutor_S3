@@ -21,8 +21,6 @@ from fastapi import FastAPI, Request
 
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0" ## Setting the visible devices for CUDA 1 Gpu will be used
-
 MODEL_NAME = 'microsoft/phi-4'
 EMBEDDING_MODEL = 'nomic-ai/nomic-embed-text-v1.5'
 SIMILARITY_THRESHOLD = 0.55
