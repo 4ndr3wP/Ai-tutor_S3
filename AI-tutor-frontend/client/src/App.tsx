@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "./components/ui/s
 import { AppSidebar } from "./components/sidebar/app-sidebar";
 import { MathJaxContext } from "better-react-mathjax";
 import axios from "axios";
+import { getApiUrl, API_CONFIG } from "./lib/api";
 
 export interface Message {
   id: number;
@@ -78,10 +79,12 @@ function App() {
       const signal = abortControllerRef.current.signal;
 
       // const res = await axios.post("http://10.164.18.48:8000/query", { // Original server endpoint
-const res = await axios.post("http://localhost:8000/query", { // Local development endpoint
+      const res = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.QUERY), { // Apple Silicon M4 Max optimized backend
         query: message,
-        size: 5,
+        size: API_CONFIG.DEFAULT_PARAMS.size,
         session_id: sessionId,
+      }, {
+        timeout: API_CONFIG.TIMEOUT, // Extended timeout for local LLM processing
       });
 
       const responseText = res.data?.response;
