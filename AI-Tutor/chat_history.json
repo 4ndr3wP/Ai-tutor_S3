@@ -376,5 +376,11 @@
         "session_id": "7d36bb9d-1469-48e1-a01b-3b0216fa5f91",
         "user_query": "What is RL?",
         "model_response": "Reinforcement Learning (RL) is a type of machine learning where an agent learns to make decisions by taking actions in an environment to maximize some notion of cumulative reward. It involves the use of rewards and penalties as signals for guiding behavior towards achieving specific goals through trial-and-error interactions with its surroundings, often using techniques like Q-learning or policy gradients.\n\nRelevant material: [week 3]"
+    },
+    {
+        "timestamp": "2025-08-07 19:09:25",
+        "session_id": "7d36bb9d-1469-48e1-a01b-3b0216fa5f91",
+        "user_query": "Tell me about OnTrack Task 1.1P",
+        "model_response": "OnTrack Task 1.1P is an individual task where students are required to download the resources for their capstone project, extract a template specifically designed for this assignment, complete it by saving as a PDF and uploading both the progress report (in PDF format) and the completed template back to OnTrack. This submission should reflect personal work done on understanding company objectives, structure, and individual contributions towards technical advancements within their team project at Deakin University's School of Information Technology. It is crucial that students avoid academic misconduct by not copying from others or treating it as a group assignment; instead, they should provide evidence supporting lasting technical contributions to the company through tools like git commit logs and portfolio management systems such as Trello or Planner.\n\nRelevant material: [week 1]"
     }
 ]
