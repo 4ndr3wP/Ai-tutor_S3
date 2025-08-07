@@ -24,7 +24,7 @@ from fastapi import FastAPI, Request
 MODEL_NAME = 'microsoft/phi-4'
 EMBEDDING_MODEL = 'nomic-ai/nomic-embed-text-v1.5'
 SIMILARITY_THRESHOLD = 0.55
-BATCH_SIZE = 64
+BATCH_SIZE = 256  # Increased from 64 to leverage 128GB unified memory
 
 # Single-query RAG prompt: no conversation history
 # RAG_TEMPLATE = """
@@ -74,7 +74,16 @@ class SentenceTransformerEmbeddings(Embeddings):
     def __init__(self, model_name=EMBEDDING_MODEL, device=None, batch_size=BATCH_SIZE):
         
         super().__init__()
-        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        # Prioritize MPS (Metal Performance Shaders) for Apple Silicon, then CUDA, then CPU
+        if device is None:
+            if torch.backends.mps.is_available():
+                device = "mps"
+            elif torch.cuda.is_available():
+                device = "cuda"
+            else:
+                device = "cpu"
+        
+        self.device = device
         print(f"#####Using device: {self.device}")
         self.model = SentenceTransformer(model_name, trust_remote_code=True, device=self.device)
         self.batch_size = batch_size
@@ -227,4 +236,4 @@ def query_rag(request: QueryRequest, http_request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)  # Using port 8001 to avoid conflict
