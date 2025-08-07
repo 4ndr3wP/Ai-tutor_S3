@@ -19,10 +19,10 @@ import { HelpModal } from "./HelpModal"
 const data = {
   teams: [
     {
-      name: "Deakin AI Tutor",
+      name: "OnTrack Assistant",
       logo: DeakinLogo,
       isImage: true,
-      plan: "Enterprise",
+      plan: "SIT378",
     },
   ],
   navSecondary: [

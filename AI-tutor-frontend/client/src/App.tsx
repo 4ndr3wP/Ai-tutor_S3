@@ -50,10 +50,6 @@ function App() {
     }
   };
 
-  const handlePromptSelect = (prompt: string) => {
-    setInputText(prompt);
-  };
-
   const handleSubmit = async (
     message: string,
     setMessage: React.Dispatch<React.SetStateAction<string>>,
@@ -139,12 +135,12 @@ function App() {
               <SidebarTrigger />
             </div>
             <div>
-              <p>SIT796 Reinforcement Learning</p>
+              <p>SIT378 Team Project (B) - Execution and Delivery</p>
             </div>
             <div className="ml-auto px-3">
               <div className="flex items-center gap-2 text-sm">
                 <div className="hidden font-medium text-muted-foreground md:inline-block">
-                  A2I2
+                  OnTrack Assistant
                 </div>
               </div>
             </div>
@@ -154,7 +150,7 @@ function App() {
               {messages.length > 0 ? (
                 <ChatMessages messages={messages} isStreaming={isStreaming} />
               ) : (
-                <ChatPrompts onPromptSelect={handlePromptSelect} />
+                <ChatPrompts />
               )}
               <div ref={messagesEndRef} />
             </div>

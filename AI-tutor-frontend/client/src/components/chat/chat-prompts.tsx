@@ -1,38 +1,37 @@
-import { SparklesIcon } from "lucide-react"
-import { Button } from "../ui/button"
-interface ChatPromptsProps {
-    onPromptSelect: (prompt: string) => void;
-  }
-
-function ChatPrompts({ onPromptSelect }: ChatPromptsProps) {
-    const prompts: string[] = [
-        "Important Questions",
-        "Doubts Related to last week Lecture",
-        "Assignments Hints",
-        "Workshop Doubt",
-        "Brain Storming"
-    ]
-
+function ChatPrompts() {
     return (
-        <div className="mx-auto max-w-md flex flex-col justify-center items-center gap-8 pt-12">
-            <div className="border p-2 rounded-2xl shadow-inner shadow-purple-200">
-                <SparklesIcon className="h-8 w-8 " />
+        <div className="mx-auto max-w-2xl flex flex-col justify-center items-center gap-8 pt-16">
+            <div className="max-w-2xl text-center">
+                <h1 className="font-bold text-5xl mb-4">
+                    <span className="bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-700 bg-clip-text text-transparent">
+                        OnTrack
+                    </span>
+                    <span className="text-slate-700 ml-2">
+                        Assistant
+                    </span>
+                </h1>
             </div>
-            <div className="max-w-xs text-center">
-                <h1 className="font-semibold text-3xl">Talk To Me</h1>
-                <p className="text-muted-foreground text-sm">Choose a prompt below or write your own to start chatting with Deakin AI Tutor</p>
-            </div>
-            <div className="flex flex-col gap-4 text-center">
-                <p className="text-muted-foreground text-sm font-normal">Ask about:</p>
-                <div className="flex flex-row flex-wrap items-center justify-center  gap-2">
-                    {prompts.map((prompt) => {
-                        return <Button
-                            key={prompt}
-                            className="cursor-pointer font-normal rounded-3xl"
-                            variant="outline" 
-                            onClick={() => onPromptSelect(prompt)} >{prompt}</Button>
-                            
-                    })}
+            <div className="flex flex-col gap-4 text-center max-w-xl">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+                    <h3 className="font-semibold text-lg text-blue-800 mb-2">Ask me about</h3>
+                    <div className="grid grid-cols-2 gap-3 text-sm text-blue-700">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                            <span>Task requirements</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                            <span>Project deliverables</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                            <span>Assignment guidance</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                            <span>Submission formats</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -54,7 +54,7 @@ function ChatInput({ handleSubmit, isStreaming, handleStopGeneration, inputText,
                         onKeyDown={handleKeyDown}
                         disabled={isStreaming}
                         className="pl-8 resize-none border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 overflow-y-auto"
-                        placeholder="Ask AI a question or make request"
+                        placeholder="Ask here"
                     />
                 </motion.div>
                 <WandSparklesIcon className="absolute top-3 left-2 text-muted-foreground h-4 w-4" />
