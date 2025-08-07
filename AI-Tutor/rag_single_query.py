@@ -11,7 +11,7 @@ from langchain.vectorstores import Chroma
 from sentence_transformers import SentenceTransformer
 from langchain.embeddings.base import Embeddings
 import torch
-from langchain_community.llms import VLLM
+from langchain_community.llms import Ollama
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 from collections import Counter
@@ -89,12 +89,10 @@ class SentenceTransformerEmbeddings(Embeddings):
 class RAGSystemSingle:
     def __init__(self):
         PERSIST_DIR = './RL_db_reference_1k_500'
-        self.llm = VLLM(
-            model=MODEL_NAME,
-            tensor_parallel_size=1, # Adjust based on your GPU setup
-            trust_remote_code=True,
-            max_new_tokens=32000,
-            gpu_memory_utilization=0.50
+        self.llm = Ollama(
+            model="phi3",  # Using phi3 until phi4 is available on Ollama
+            temperature=0.1,
+            num_ctx=8192,  # Context window size
         )
         self.embeddings = SentenceTransformerEmbeddings(batch_size=BATCH_SIZE)
         self.vectorstore = Chroma(persist_directory=PERSIST_DIR,
