@@ -253,7 +253,7 @@ class MultiTurnManager:
         
         return "\n".join(lines)
 
-    async def ask(self, question: str, session_id: str, k: Optional[int] = None) -> str:
+    async def ask(self, query: str, session_id: str, k: Optional[int] = None) -> str:
         """
         Handles a user query by retrieving context, incorporating memory,
         and generating a response using the LCEL chain.
@@ -264,7 +264,7 @@ class MultiTurnManager:
             
             # 2. Retrieve relevant documents
             search_k = k or CFG.DEFAULT_K
-            docs = self.retriever.get_relevant_documents(question)
+            docs = self.retriever.get_relevant_documents(query)
             
             context = self._format_docs(docs)
             
@@ -278,15 +278,24 @@ class MultiTurnManager:
             # 4. Invoke the LCEL chain with all necessary inputs
             response = await self.chain.ainvoke({
                 "context": context,
-                "question": question,
+                "question": query,
                 "chat_history": history
             })
             
             # 5. Save the new interaction to memory
-            memory.save_context({"input": question}, {"output": response})
+            memory.save_context({"input": query}, {"output": response})
             
             # 6. Log interaction to file
-            self._log_interaction(question, response, session_id)
+            self._log_interaction(query, response, session_id)
+            
+            # Check for casual conversation
+            casual_greetings = ['hello', 'hi', 'hey', 'how are you', 'good morning', 'good afternoon', 'good evening']
+            
+            if any(greeting in query.lower() for greeting in casual_greetings):
+                return "Hello! I'm SmartNotes AI, your personal learning assistant. I'm here to help you understand your uploaded content, answer questions about your materials, or even generate quizzes to test your knowledge. What would you like to explore today?"
+            
+            if query.lower() in ['thanks', 'thank you', 'thank you!']:
+                return "You're welcome! I'm here whenever you need help with your learning materials. Feel free to ask me anything!"
             
             return response
             
