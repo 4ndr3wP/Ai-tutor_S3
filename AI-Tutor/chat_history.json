@@ -382,5 +382,29 @@
         "session_id": "7d36bb9d-1469-48e1-a01b-3b0216fa5f91",
         "user_query": "Tell me about OnTrack Task 1.1P",
         "model_response": "OnTrack Task 1.1P is an individual task where students are required to download the resources for their capstone project, extract a template specifically designed for this assignment, complete it by saving as a PDF and uploading both the progress report (in PDF format) and the completed template back to OnTrack. This submission should reflect personal work done on understanding company objectives, structure, and individual contributions towards technical advancements within their team project at Deakin University's School of Information Technology. It is crucial that students avoid academic misconduct by not copying from others or treating it as a group assignment; instead, they should provide evidence supporting lasting technical contributions to the company through tools like git commit logs and portfolio management systems such as Trello or Planner.\n\nRelevant material: [week 1]"
+    },
+    {
+        "timestamp": "2025-08-07 19:41:14",
+        "session_id": null,
+        "user_query": "What are the main objectives for SIT378?",
+        "model_response": "The primary objective is to create an AI-driven navigation aid that improves environmental awareness, obstacle detection, and wayfinding for individuals with disabilities. The project aims to align with universal design principles ensuring scalability, practical usability, ethical standards of data privacy, user autonomy, and impacts various stakeholders including inclusive entrepreneurship organizations, advocacy groups, and regional policymakers committed to accessibility equity.\n\nRelevant material: [week 1]"
+    },
+    {
+        "timestamp": "2025-08-07 19:45:02",
+        "session_id": "7d36bb9d-1469-48e1-a01b-3b0216fa5f91",
+        "user_query": "Task 5.1P is due in days but I'm not quite finished it. Can you offer some clues as to exactly what to do?",
+        "model_response": "To complete Task 5.1P, follow these steps based on the context provided in your individual retrospective task (5.1P):\n\n- Download and extract the template for your course from OnTrack as instructed. This will serve as a guide to reflecting on your progress.\n- Reflect using bullet points summarizing up to 200 words of recent achievements, changes in plans if any, and key contributions by team members within each project (referencing SFIA Framework). Ensure this is high-level rather than detailed descriptions.\n- Save the document as a PDF on your personal computer.\n- Upload both the progress report and its corresponding template to OnTrack for submission. Remember not to copy from other students, which would be considered academic misconduct.\n\nRelevant material: [week 1]"
+    },
+    {
+        "timestamp": "2025-08-08 08:13:19",
+        "session_id": "7d36bb9d-1469-48e1-a01b-3b0216fa5f91",
+        "user_query": "Tell ma about the Company",
+        "model_response": "The company is focused on creating a system to help Mekong Inclusive Ventures (MIV) track and manage early-stage businesses they support. The project, called the \"Venture Pipeline Management System Project,\" aims to organize and monitor activities related to assessment, preparation for funding, and connecting ventures with capital in one place. It is expected that this system will be comprehensive, scalable, bilingual, accessible for non-technical users, and tailored for MIV's regional impact. The project has specific goals such as equipping professionals across key sectors to adapt to AI changes, enabling organizations and career advisors to guide workforce transition, and contributing to a sustainable future-ready workforce aligned with AI innovations."
+    },
+    {
+        "timestamp": "2025-08-08 08:15:29",
+        "session_id": "7d36bb9d-1469-48e1-a01b-3b0216fa5f91",
+        "user_query": "Mekong Inclusive Ventures? That's not the Company at all. What are you talking about?",
+        "model_response": "The context provided discusses various Capstone projects and team members from Deakin University, including a project called \"Venture Pipeline Management System\" aimed at supporting early-stage businesses through key steps like assessment, preparation for funding, and connecting them with capital. The AI-Assisted Navigation Device Project is another initiative focused on creating an accessible tool to help Mekong Inclusive Ventures track inclusive ventures from startups to investments using advanced sensor technology providing real-time feedback. Both projects have specific objectives for the trimester and long-term deliverables, including prototypes, reports, websites, videos, and more.\n\nFor your question about Mekong Inclusive Ventures not being a company at all: it seems there might be some confusion or miscommunication here as \"Mekong Inclusive Ventures\" is mentioned in the context of these projects related to Deakin University's Capstone Program, where they are collaborating on various initiatives. If you have any specific questions about Mekong Inclusive Ventures outside this project scope or if it refers to a different entity entirely, please provide more details for accurate information.\n\nRelevant material: [week 1]"
     }
 ]
