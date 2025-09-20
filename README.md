@@ -1,14 +1,13 @@
 ## 🧠 AI-Tutor
 AI-Tutor is a RAG (Retrieval-Augmented Generation) pipeline designed to turn unstructured document collections into intelligent, queryable knowledge systems. It leverages modern LLM tooling for smart document ingestion, indexing, and frontend integration.
 
-
 ## 📦 Prerequisites
 Before running the project, make sure the following dependencies are installed:
 
-
-- Python 3.x
-- Docling
-- ChromaDB
+- Python 3.10+
+- Node.js (for frontend)
+- Ollama (for local LLM inference)
+- Conda (for environment management)
 
 ## ⚙️ How It Works
 * Document Conversion
@@ -21,13 +20,11 @@ Before running the project, make sure the following dependencies are installed:
     - A LangChain-based pipeline is built to query the vector store using LLMs for intelligent response generation.
 
 * API Integration
-    - A Flask API wraps the backend logic for integration with the frontend application.
+    - A FastAPI backend wraps the RAG logic for integration with the React frontend application.
 
 Architecture Overview
 * **Overall architecture** 
 ![alt text](AI-Tutor/rag_pipline.png)
-
-
 
 ## 📁 Project Structure
 ```
@@ -35,62 +32,99 @@ AI-Tutor/
 │
 ├── AI-Tutor/               # Backend logic and RAG pipeline
 │   ├── docling_run.py
-│   └── rag_single_query.py
+│   ├── rag_single_query.py
+│   └── environment.yml
 │
 ├── AI-tutor-frontend/      # Frontend client
     └── client/
 ```
 
-## 🚀 Setup Instructions
+## 🚀 Complete Setup Instructions
 
-```# Navigate to backend directory
-cd AI-Tutor
+### Backend Setup
 
-# Create virtual environment (optional but recommended)
-module load Anaconda3
+1. **Navigate to backend directory:**
+   ```bash
+   cd AI-Tutor
+   ```
 
-conda env create -f environment.yml
+2. **Create and activate conda environment:**
+   ```bash
+   conda env create -f environment.yml
+   conda activate ai-tutor-apple-silicon
+   ```
 
-source activate
+3. **Install additional required packages:**
+   ```bash
+   pip install einops langchain-ollama
+   ```
 
-conda activate test_app
-```
+4. **Install and start Ollama:**
+   ```bash
+   # Install Ollama (if not already installed)
+   brew install ollama
+   
+   # Start Ollama service
+   ollama serve &
+   
+   # Download the required model
+   ollama pull phi3
+   ```
 
-## Runing RAG pipline 
+5. **Start the backend:**
+   ```bash
+   # Option 1: Use the optimized startup script
+   ./run_macos.sh
+   
+   # Option 2: Run directly
+   python rag_single_query.py
+   ```
+   
+   The backend will be available at `http://localhost:8001`
 
-```
-python rag_single_query.py
-```
+### Frontend Setup
 
+1. **Navigate to frontend directory:**
+   ```bash
+   cd AI-tutor-frontend/client
+   ```
 
-## 🌐 Frontend Setup
+2. **Clean and install dependencies:**
+   ```bash
+   # Clean any existing installation
+   rm -rf node_modules package-lock.json
+   
+   # Install dependencies
+   npm install
+   ```
 
+3. **Start the frontend:**
+   ```bash
+   npm run dev
+   ```
+   
+   The frontend will be available at `http://localhost:5001` (or another port if 5001 is in use)
 
-* Install [Nodejs](https://nodejs.org/en/download) 
-* Navigate to the client directory
+## 🌐 Access the Application
 
+- **Frontend**: `http://localhost:5001` (or check terminal for actual port)
+- **Backend API**: `http://localhost:8001`
+- **API Documentation**: `http://localhost:8001/docs`
 
-```
-cd AI-tutor-frontend/client
+## 🎯 Features
 
-```
-* Start the frontend
+- **Apple Silicon Optimized**: Uses MPS (Metal Performance Shaders) for GPU acceleration
+- **Local LLM**: Uses Ollama with phi3 model for privacy and offline operation
+- **RAG Pipeline**: Queries a pre-built vector database of educational content
+- **Modern UI**: React + TypeScript frontend with Tailwind CSS
+- **Real-time Chat**: Interactive chat interface for educational queries
 
+## 📄 Notes
 
-
-```
-npm run dev
-
-```
-
-### Set API Endpoint
-- Open src/App.tsx and update the API endpoint to match your Flask backend URL. Change the existed URL to the new URL of allocated GPU Node.
-    
-```
-        const res = await axios.post("http://10.72.191.93:8000/query",
-
-```
-
+- The system is optimized for Apple Silicon Macs with MPS acceleration
+- Backend runs on port 8001 (not 8000) as per Apple Silicon migration
+- Frontend automatically finds available ports starting from 5000
+- All dependencies are managed through conda and npm
 
 
 
