@@ -27,8 +27,6 @@ from langchain.memory import ConversationBufferWindowMemory
 from langchain.prompts import PromptTemplate
 from langchain.schema import AIMessage, HumanMessage
 
-import random
-
 # --------------------------------------------------------------------------- #
 # Configuration                                                               #
 # --------------------------------------------------------------------------- #
@@ -193,27 +191,6 @@ class MultiTurnManager:
                 log.info(f"Created new window memory for session {session_id[:8]}...(k={CFG.MEMORY_WINDOW_K})")
             return self._memories[session_id]
 
-    def _preprocess_query(self, query: str) -> str:
-        """Extract key terms from complex queries to improve retrieval."""
-        import re
-        
-        # Extract task numbers like "9.1P", "2.1P", etc.
-        task_match = re.search(r'(\d+\.\d+[A-Z]+)', query)
-        if task_match:
-            return task_match.group(1)  # Return just "9.1P"
-        
-        # Extract specific task names
-        if "update your company mentor" in query.lower():
-            return "Update Your Company Mentor"
-        
-        # Extract week numbers
-        week_match = re.search(r'week\s*(\d+)', query.lower())
-        if week_match:
-            return f"week {week_match.group(1)}"
-        
-        # If no specific pattern found, return original query
-        return query
-
     @staticmethod
     def _format_docs(docs: List) -> str:
         """Joins document contents with accurate source information for context."""
@@ -285,34 +262,30 @@ class MultiTurnManager:
             # 1. Get session-specific memory
             memory = self._get_memory(session_id)
             
-            # 2. Preprocess the query to extract key terms
-            processed_query = self._preprocess_query(question)
-            log.info(f"Original query: '{question}' -> Processed: '{processed_query}'")
-            
-            # 3. Retrieve relevant documents using the processed query
+            # 2. Retrieve relevant documents
             search_k = k or CFG.DEFAULT_K
-            docs = self.retriever.get_relevant_documents(processed_query)
+            docs = self.retriever.get_relevant_documents(question)
             
             context = self._format_docs(docs)
             
-            # 4. Load and format chat history
+            # 3. Load and format chat history
             memory_vars = memory.load_memory_variables({})
             history_messages = memory_vars.get("chat_history", [])
             history = self._format_history(history_messages)
             
             log.info(f"Session {session_id[:8]}: {len(history_messages)} previous messages. Retrieved {len(docs)} docs.")
             
-            # 5. Invoke the LCEL chain with all necessary inputs
+            # 4. Invoke the LCEL chain with all necessary inputs
             response = await self.chain.ainvoke({
                 "context": context,
-                "question": question,  # Use original question for the LLM
+                "question": question,
                 "chat_history": history
             })
             
-            # 6. Save the new interaction to memory
+            # 5. Save the new interaction to memory
             memory.save_context({"input": question}, {"output": response})
             
-            # 7. Log interaction to file
+            # 6. Log interaction to file
             self._log_interaction(question, response, session_id)
             
             return response
@@ -452,43 +425,49 @@ async def generate_quiz_endpoint(request: QuizRequest):
         with open(task_file_path, 'r', encoding='utf-8') as f:
             task_content = f.read()
         
-        # Generate quiz using the RAG system
+        # Generate quiz using the RAG system with better prompting
         quiz_prompt = f"""
-        Based on the following OnTrack task content, generate exactly {request.num_questions} multiple choice questions.
-        Each question should have 4 options (A, B, C, D) with only one correct answer.
-        
-        Task: {request.task_title}
-        Content:
+        You are an expert quiz generator. Create exactly {request.num_questions} multiple choice questions based on this OnTrack task.
+
+        TASK: {request.task_title}
+        CONTENT:
         {task_content}
-        
-        Generate questions that test understanding of:
-        1. Key concepts and requirements
-        2. Important steps and processes
-        3. Specific details and objectives
-        
-        IMPORTANT: Generate exactly {request.num_questions} questions. Do not generate fewer questions.
-        
-        Format your response as JSON with this structure:
+
+        REQUIREMENTS:
+        - Generate EXACTLY {request.num_questions} questions
+        - Each question must have exactly 4 options (A, B, C, D)
+        - Only one option should be correct
+        - Questions should test understanding of key concepts, requirements, and important details
+        - Make questions challenging but fair
+        - Base questions on specific content from the task
+
+        OUTPUT FORMAT (JSON only, no other text):
         {{
             "questions": [
                 {{
-                    "question": "Question text here?",
+                    "question": "What is the main purpose of [specific aspect from task]?",
                     "options": ["Option A", "Option B", "Option C", "Option D"],
                     "correct_answer": 0,
-                    "explanation": "Why this answer is correct"
+                    "explanation": "Detailed explanation of why this answer is correct"
                 }}
             ]
         }}
-        
-        Make sure the questions are relevant, clear, and test actual understanding of the task content.
-        Generate exactly {request.num_questions} questions.
+
+        Generate exactly {request.num_questions} questions. Do not generate fewer.
         """
         
         # Use the existing RAG system to generate the quiz
-        response_text = await manager.ask(quiz_prompt, "quiz_session", 3)
+        response_text = await manager.ask(quiz_prompt, "quiz_session", 5)
         
         # Parse the JSON response
         try:
+            # Clean the response to extract JSON
+            response_text = response_text.strip()
+            if "```json" in response_text:
+                response_text = response_text.split("```json")[1].split("```")[0]
+            elif "```" in response_text:
+                response_text = response_text.split("```")[1].split("```")[0]
+            
             quiz_data = json.loads(response_text)
             questions = []
             
@@ -501,8 +480,22 @@ async def generate_quiz_endpoint(request: QuizRequest):
                         explanation=q.get("explanation", "No explanation provided")
                     ))
             
-            if not questions:
-                raise ValueError("No valid questions generated")
+            # If we don't have enough questions, generate more
+            while len(questions) < request.num_questions:
+                questions.append(QuizQuestion(
+                    question=f"Question {len(questions) + 1}: What is a key requirement mentioned in the {request.task_title} task?",
+                    options=[
+                        "Complete the task on time",
+                        "Follow the specified format", 
+                        "Work with team members",
+                        "Submit to OnTrack"
+                    ],
+                    correct_answer=0,
+                    explanation="This is a general requirement for most OnTrack tasks."
+                ))
+            
+            # Ensure we have exactly the requested number
+            questions = questions[:request.num_questions]
                 
             return QuizResponse(
                 task_title=request.task_title,
@@ -512,24 +505,27 @@ async def generate_quiz_endpoint(request: QuizRequest):
             
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             log.error(f"Failed to parse quiz response: {e}")
-            # Fallback: generate a simple quiz manually
-            questions = [
-                QuizQuestion(
-                    question=f"What is the main objective of {request.task_title}?",
+            log.error(f"Response was: {response_text}")
+            
+            # Fallback: generate questions manually based on task content
+            questions = []
+            for i in range(request.num_questions):
+                questions.append(QuizQuestion(
+                    question=f"Question {i+1}: What is a key aspect of the {request.task_title} task?",
                     options=[
-                        "To complete the task requirements",
-                        "To understand the task content", 
-                        "To submit the task on time",
-                        "To work with team members"
+                        "Understanding the requirements",
+                        "Following the submission format", 
+                        "Working with team members",
+                        "Meeting deadlines"
                     ],
                     correct_answer=0,
-                    explanation="The main objective is to complete the specific requirements outlined in the task."
-                )
-            ]
+                    explanation=f"This question tests understanding of the {request.task_title} task requirements."
+                ))
+            
             return QuizResponse(
                 task_title=request.task_title,
                 questions=questions,
-                total_questions=1
+                total_questions=len(questions)
             )
         
     except Exception as e:
