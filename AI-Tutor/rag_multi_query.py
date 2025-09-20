@@ -191,6 +191,27 @@ class MultiTurnManager:
                 log.info(f"Created new window memory for session {session_id[:8]}...(k={CFG.MEMORY_WINDOW_K})")
             return self._memories[session_id]
 
+    def _preprocess_query(self, query: str) -> str:
+        """Extract key terms from complex queries to improve retrieval."""
+        import re
+        
+        # Extract task numbers like "9.1P", "2.1P", etc.
+        task_match = re.search(r'(\d+\.\d+[A-Z]+)', query)
+        if task_match:
+            return task_match.group(1)  # Return just "9.1P"
+        
+        # Extract specific task names
+        if "update your company mentor" in query.lower():
+            return "Update Your Company Mentor"
+        
+        # Extract week numbers
+        week_match = re.search(r'week\s*(\d+)', query.lower())
+        if week_match:
+            return f"week {week_match.group(1)}"
+        
+        # If no specific pattern found, return original query
+        return query
+
     @staticmethod
     def _format_docs(docs: List) -> str:
         """Joins document contents with accurate source information for context."""
@@ -262,30 +283,34 @@ class MultiTurnManager:
             # 1. Get session-specific memory
             memory = self._get_memory(session_id)
             
-            # 2. Retrieve relevant documents
+            # 2. Preprocess the query to extract key terms
+            processed_query = self._preprocess_query(question)
+            log.info(f"Original query: '{question}' -> Processed: '{processed_query}'")
+            
+            # 3. Retrieve relevant documents using the processed query
             search_k = k or CFG.DEFAULT_K
-            docs = self.retriever.get_relevant_documents(question)
+            docs = self.retriever.get_relevant_documents(processed_query)
             
             context = self._format_docs(docs)
             
-            # 3. Load and format chat history
+            # 4. Load and format chat history
             memory_vars = memory.load_memory_variables({})
             history_messages = memory_vars.get("chat_history", [])
             history = self._format_history(history_messages)
             
             log.info(f"Session {session_id[:8]}: {len(history_messages)} previous messages. Retrieved {len(docs)} docs.")
             
-            # 4. Invoke the LCEL chain with all necessary inputs
+            # 5. Invoke the LCEL chain with all necessary inputs
             response = await self.chain.ainvoke({
                 "context": context,
-                "question": question,
+                "question": question,  # Use original question for the LLM
                 "chat_history": history
             })
             
-            # 5. Save the new interaction to memory
+            # 6. Save the new interaction to memory
             memory.save_context({"input": question}, {"output": response})
             
-            # 6. Log interaction to file
+            # 7. Log interaction to file
             self._log_interaction(question, response, session_id)
             
             return response
