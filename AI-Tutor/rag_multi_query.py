@@ -27,6 +27,8 @@ from langchain.memory import ConversationBufferWindowMemory
 from langchain.prompts import PromptTemplate
 from langchain.schema import AIMessage, HumanMessage
 
+import random
+
 # --------------------------------------------------------------------------- #
 # Configuration                                                               #
 # --------------------------------------------------------------------------- #
@@ -381,6 +383,23 @@ class QueryResponse(BaseModel):
     response: str
     session_id: str
 
+class QuizRequest(BaseModel):
+    task_id: str
+    task_title: str
+    filename: str
+    num_questions: int = 5
+
+class QuizQuestion(BaseModel):
+    question: str
+    options: List[str]
+    correct_answer: int  # Index of correct answer (0-3)
+    explanation: str
+
+class QuizResponse(BaseModel):
+    task_title: str
+    questions: List[QuizQuestion]
+    total_questions: int
+
 @app.get("/health", summary="Health Check")
 async def health():
     """Provides the operational status of the service."""
@@ -412,6 +431,110 @@ async def query_endpoint(request: QueryRequest):
     except Exception as e:
         log.error(f"Critical endpoint error for session {request.session_id[:8]}: {e}")
         raise HTTPException(status_code=500, detail="An unexpected server error occurred.")
+
+@app.post("/generate-quiz", response_model=QuizResponse, summary="Generate Quiz for OnTrack Task")
+async def generate_quiz_endpoint(request: QuizRequest):
+    """
+    Generate a multiple choice quiz based on an OnTrack task.
+    """
+    if not manager:
+        raise HTTPException(
+            status_code=503, 
+            detail="System is initializing, please retry in a moment."
+        )
+
+    try:
+        # Read the OnTrack task file
+        task_file_path = f"./OnTrackTasks/{request.filename}"
+        if not os.path.exists(task_file_path):
+            raise HTTPException(status_code=404, detail=f"Task file not found: {request.filename}")
+        
+        with open(task_file_path, 'r', encoding='utf-8') as f:
+            task_content = f.read()
+        
+        # Generate quiz using the RAG system
+        quiz_prompt = f"""
+        Based on the following OnTrack task content, generate exactly {request.num_questions} multiple choice questions.
+        Each question should have 4 options (A, B, C, D) with only one correct answer.
+        
+        Task: {request.task_title}
+        Content:
+        {task_content}
+        
+        Generate questions that test understanding of:
+        1. Key concepts and requirements
+        2. Important steps and processes
+        3. Specific details and objectives
+        
+        IMPORTANT: Generate exactly {request.num_questions} questions. Do not generate fewer questions.
+        
+        Format your response as JSON with this structure:
+        {{
+            "questions": [
+                {{
+                    "question": "Question text here?",
+                    "options": ["Option A", "Option B", "Option C", "Option D"],
+                    "correct_answer": 0,
+                    "explanation": "Why this answer is correct"
+                }}
+            ]
+        }}
+        
+        Make sure the questions are relevant, clear, and test actual understanding of the task content.
+        Generate exactly {request.num_questions} questions.
+        """
+        
+        # Use the existing RAG system to generate the quiz
+        response_text = await manager.ask(quiz_prompt, "quiz_session", 3)
+        
+        # Parse the JSON response
+        try:
+            quiz_data = json.loads(response_text)
+            questions = []
+            
+            for q in quiz_data.get("questions", []):
+                if len(q.get("options", [])) == 4 and 0 <= q.get("correct_answer", -1) <= 3:
+                    questions.append(QuizQuestion(
+                        question=q["question"],
+                        options=q["options"],
+                        correct_answer=q["correct_answer"],
+                        explanation=q.get("explanation", "No explanation provided")
+                    ))
+            
+            if not questions:
+                raise ValueError("No valid questions generated")
+                
+            return QuizResponse(
+                task_title=request.task_title,
+                questions=questions,
+                total_questions=len(questions)
+            )
+            
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            log.error(f"Failed to parse quiz response: {e}")
+            # Fallback: generate a simple quiz manually
+            questions = [
+                QuizQuestion(
+                    question=f"What is the main objective of {request.task_title}?",
+                    options=[
+                        "To complete the task requirements",
+                        "To understand the task content", 
+                        "To submit the task on time",
+                        "To work with team members"
+                    ],
+                    correct_answer=0,
+                    explanation="The main objective is to complete the specific requirements outlined in the task."
+                )
+            ]
+            return QuizResponse(
+                task_title=request.task_title,
+                questions=questions,
+                total_questions=1
+            )
+        
+    except Exception as e:
+        log.error(f"Quiz generation error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate quiz")
 
 if __name__ == "__main__":
     import uvicorn
