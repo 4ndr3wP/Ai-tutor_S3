@@ -48,7 +48,7 @@ pipeline_options.do_ocr = True
 ocr_options = TesseractCliOcrOptions(force_full_page_ocr=True)
 pipeline_options.ocr_options = ocr_options
 
-file_patterns = ['*.txt', '*.html', '*.docx', '*.pdf']
+file_patterns = ['*.txt', '*.html', '*.docx', '*.pdf', '*.md']  # Added .md files
 embedding_batch_size = 64
 
 # List to store all the files
@@ -63,31 +63,13 @@ input_paths = all_files
 
 # Initialize DocumentConverter for supported formats
 doc_converter = DocumentConverter(
-    # allowed_formats=[
-    #     InputFormat.PDF,
-    #     InputFormat.IMAGE,
-    #     InputFormat.DOCX,
-    #     InputFormat.HTML,
-    #     InputFormat.PPTX,
-    #     InputFormat.ASCIIDOC,
-    #     InputFormat.CSV,
-    #     InputFormat.MD,
-    # ],
-    # format_options={
-    #     InputFormat.PDF: PdfFormatOption(
-    #         pipeline_cls=StandardPdfPipeline,
-    #     ),
-    #     InputFormat.DOCX: WordFormatOption(
-    #         pipeline_cls=SimplePipeline
-    #     ),
-    # },
-        format_options={
+    format_options={
         InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
     }
 )
 
 def process_text_file(file_path: str) -> dict:
-    """Process a .txt file and return a simple result structure."""
+    """Process a .txt or .md file and return a simple result structure."""
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -103,8 +85,8 @@ def process_text_file(file_path: str) -> dict:
             "error": str(e)
         }
 
-txt_files = [f for f in input_paths if f.lower().endswith('.txt')]
-non_txt_files = [f for f in input_paths if not f.lower().endswith('.txt')]
+txt_files = [f for f in input_paths if f.lower().endswith(('.txt', '.md'))]  # Include .md files
+non_txt_files = [f for f in input_paths if not f.lower().endswith(('.txt', '.md'))]
 
 conv_results = []
 if non_txt_files:
@@ -126,40 +108,76 @@ def save_converted_data(docs, output_dir):
 
 save_converted_data(conv_results, OUTPUT_DIR)
 
-
-
 ### The following code is doing the vectorization and storing in Chroma DB
-# Uncomment the following lines if you want to load the documents and create a vector store
+# UNCOMMENTED AND MODIFIED FOR YOUR SETUP
 
+loader = DirectoryLoader(OUTPUT_DIR, glob="*.md")
+documents = loader.load()
 
-# loader = DirectoryLoader(OUTPUT_DIR, glob="*.md")
-# documents = loader.load()
-# text_splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=0)
-# all_splits = text_splitter.split_documents(documents)
+# Add metadata to documents
+for doc in documents:
+    # Extract week/task info from filename
+    filename = doc.metadata.get('source', '').split('/')[-1]
+    if 'OnTrack' in filename:
+        # Extract task number like "2.1P", "9.1P", etc.
+        import re
+        task_match = re.search(r'(\d+)\.(\d+)[A-Z]+', filename)
+        if task_match:
+            week_num = task_match.group(1)
+            task_num = task_match.group(2)
+            doc.metadata['week'] = f"week{week_num.zfill(2)}_task{task_num}"
+        else:
+            doc.metadata['week'] = "unknown"
+        
+        # Determine if it's a task sheet or submission
+        if 'submission' in filename.lower():
+            doc.metadata['doc_type'] = 'submission'
+        else:
+            doc.metadata['doc_type'] = 'task_sheet'
+    else:
+        doc.metadata['week'] = "unknown"
+        doc.metadata['doc_type'] = "other"
 
-# class SentenceTransformerEmbeddings(Embeddings):
-#     def __init__(self, model_name="nomic-ai/nomic-embed-text-v1.5", device=None, batch_size=32):
-#         super().__init__()
-#         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-#         self.model = SentenceTransformer(model_name, trust_remote_code=True, device=self.device)
-#         self.batch_size = batch_size
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+all_splits = text_splitter.split_documents(documents)
 
-#     def embed_documents(self, texts):
-#         texts = ["search_document: "+i for i in texts]
-#         return self.model.encode(
-#             texts, 
-#             convert_to_numpy=True, 
-#             device=self.device, 
-#             batch_size=self.batch_size
-#         ).tolist()
+class SentenceTransformerEmbeddings(Embeddings):
+    def __init__(self, model_name="nomic-ai/nomic-embed-text-v1.5", device=None, batch_size=64):
+        super().__init__()
+        # Prioritize MPS for Apple Silicon
+        if device is None:
+            if torch.backends.mps.is_available():
+                device = "mps"
+            elif torch.cuda.is_available():
+                device = "cuda"
+            else:
+                device = "cpu"
+        
+        self.device = device
+        print(f"Using device: {self.device}")
+        self.model = SentenceTransformer(model_name, trust_remote_code=True, device=self.device)
+        self.batch_size = batch_size
 
-#     def embed_query(self, text):
-#         return self.model.encode(
-#             ['search_query: '+text], 
-#             convert_to_numpy=True, 
-#             device=self.device
-#         )[0].tolist()
+    def embed_documents(self, texts):
+        texts = ["search_document: "+i for i in texts]
+        return self.model.encode(
+            texts, 
+            convert_to_numpy=True, 
+            device=self.device, 
+            batch_size=self.batch_size
+        ).tolist()
 
-# local_embeddings = SentenceTransformerEmbeddings(batch_size=64)
-# VECTOR_DATABASE.mkdir(parents=True, exist_ok=True)
-# vectorstore = Chroma.from_documents(documents=all_splits, embedding=local_embeddings, persist_directory=str(VECTOR_DATABASE))
+    def embed_query(self, text):
+        return self.model.encode(
+            ['search_query: '+text], 
+            convert_to_numpy=True, 
+            device=self.device
+        )[0].tolist()
+
+print("Creating embeddings and vector store...")
+local_embeddings = SentenceTransformerEmbeddings(batch_size=64)
+VECTOR_DATABASE.mkdir(parents=True, exist_ok=True)
+vectorstore = Chroma.from_documents(documents=all_splits, embedding=local_embeddings, persist_directory=str(VECTOR_DATABASE))
+
+print(f"Vector store created with {len(all_splits)} chunks")
+print(f"Database saved to: {VECTOR_DATABASE}")
