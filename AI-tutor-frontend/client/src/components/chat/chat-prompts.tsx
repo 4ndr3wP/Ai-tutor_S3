@@ -8,6 +8,15 @@ interface ChatPromptsProps {
 }
 
 export default function ChatPrompts({ onQuizClick }: ChatPromptsProps) {
+  const handleQuizClick = () => {
+    console.log("Quiz Me Now button clicked!") // Debug log
+    if (onQuizClick) {
+      onQuizClick()
+    } else {
+      console.error("onQuizClick prop not provided!")
+    }
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-full px-6 py-12">
       {/* Hero Section */}
@@ -50,7 +59,7 @@ export default function ChatPrompts({ onQuizClick }: ChatPromptsProps) {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 pointer-events-none"></div>
             <CardHeader className="text-center py-8 relative">
               <motion.div 
                 className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl"
@@ -63,8 +72,7 @@ export default function ChatPrompts({ onQuizClick }: ChatPromptsProps) {
                 Ready to Test Your Knowledge? 🧠
               </CardTitle>
               <CardDescription className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Challenge yourself with AI-generated quizzes based on your uploaded content. 
-                Perfect for reinforcing your learning and preparing for assessments!
+                Challenge yourself with AI-generated quizzes based on your uploaded content.
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center pb-8">
@@ -73,12 +81,13 @@ export default function ChatPrompts({ onQuizClick }: ChatPromptsProps) {
                 whileTap={{ scale: 0.95 }}
               >
                 <Button 
-                  onClick={onQuizClick}
+                  onClick={handleQuizClick}
                   size="lg" 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-6 text-xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-2xl border-0"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-6 text-xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-2xl border-0 cursor-pointer"
+                  disabled={false}
                 >
                   <Brain className="mr-3 h-6 w-6" />
-                   Quiz Me Now!
+                  Quiz Me Now!
                   <Award className="ml-3 h-6 w-6" />
                 </Button>
               </motion.div>
@@ -112,7 +121,7 @@ export default function ChatPrompts({ onQuizClick }: ChatPromptsProps) {
             <div className="flex items-center justify-center gap-3 mb-4">
               <Sparkles className="h-6 w-6 text-blue-600" />
               <h2 className="text-2xl font-bold text-gray-800">
-                Ask me anything about your content
+                Let's chat!
               </h2>
             </div>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
