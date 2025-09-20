@@ -74,12 +74,13 @@ function App() {
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
 
-      const res = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.QUERY), {
+      // const res = await axios.post("http://10.164.18.48:8000/query", { // Original server endpoint
+      const res = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.QUERY), { // Apple Silicon M4 Max optimized backend
         query: message,
         size: API_CONFIG.DEFAULT_PARAMS.size,
         session_id: sessionId,
       }, {
-        timeout: API_CONFIG.TIMEOUT,
+        timeout: API_CONFIG.TIMEOUT, // Extended timeout for local LLM processing
       });
 
       const responseText = res.data?.response;
@@ -122,12 +123,23 @@ function App() {
     scrollToBottom();
   }, [messages]);
 
+  // Quiz modal state
+  const [showQuizModal, setShowQuizModal] = useState(false)
+
+  const handleQuizClick = () => {
+    console.log("Quiz button clicked!") // Debug log
+    setShowQuizModal(true)
+  }
+
   return (
     <MathJaxContext config={{
       tex2jax: { inlineMath: [["$", "$"], ["\\(", "\\)"]] }
     }}>
       <SidebarProvider>
-        <AppSidebar />
+        <AppSidebar 
+          showQuizModal={showQuizModal}
+          setShowQuizModal={setShowQuizModal}
+        />
         <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 sticky bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
             <div className="flex items-center gap-3 px-6">
@@ -135,18 +147,18 @@ function App() {
               <div className="h-8 w-px bg-white/30" />
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  <span className="text-lg font-bold">🎓</span>
+                  <span className="text-lg font-bold">🧠</span>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold">SIT378 Team Project (B)</h1>
-                  <p className="text-sm text-blue-100">Execution and Delivery</p>
+                  <h1 className="text-xl font-bold">SmartNotes AI</h1>
+                  <p className="text-sm text-blue-100">Your Personal Learning Assistant</p>
                 </div>
               </div>
             </div>
             <div className="ml-auto px-6">
               <div className="flex items-center gap-3">
                 <div className="px-3 py-1 bg-white/20 rounded-full">
-                  <span className="text-sm font-medium">OnTrack Assistant</span>
+                  <span className="text-sm font-medium">AI Assistant</span>
                 </div>
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               </div>
@@ -157,7 +169,7 @@ function App() {
               {messages.length > 0 ? (
                 <ChatMessages messages={messages} isStreaming={isStreaming} />
               ) : (
-                <ChatPrompts />
+                <ChatPrompts onQuizClick={handleQuizClick} />
               )}
               <div ref={messagesEndRef} />
             </div>
