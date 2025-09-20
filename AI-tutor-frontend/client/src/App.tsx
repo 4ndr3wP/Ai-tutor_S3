@@ -74,13 +74,12 @@ function App() {
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
 
-      // const res = await axios.post("http://10.164.18.48:8000/query", { // Original server endpoint
-      const res = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.QUERY), { // Apple Silicon M4 Max optimized backend
+      const res = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.QUERY), {
         query: message,
         size: API_CONFIG.DEFAULT_PARAMS.size,
         session_id: sessionId,
       }, {
-        timeout: API_CONFIG.TIMEOUT, // Extended timeout for local LLM processing
+        timeout: API_CONFIG.TIMEOUT,
       });
 
       const responseText = res.data?.response;
@@ -130,22 +129,30 @@ function App() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-14 shrink-0 items-center gap-2 sticky">
-            <div className="flex items-center gap-2 px-3">
-              <SidebarTrigger />
-            </div>
-            <div>
-              <p>SIT378 Team Project (B) - Execution and Delivery</p>
-            </div>
-            <div className="ml-auto px-3">
-              <div className="flex items-center gap-2 text-sm">
-                <div className="hidden font-medium text-muted-foreground md:inline-block">
-                  OnTrack Assistant
+          <header className="flex h-16 shrink-0 items-center gap-2 sticky bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
+            <div className="flex items-center gap-3 px-6">
+              <SidebarTrigger className="text-white hover:bg-white/20" />
+              <div className="h-8 w-px bg-white/30" />
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <span className="text-lg font-bold">🎓</span>
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold">SIT378 Team Project (B)</h1>
+                  <p className="text-sm text-blue-100">Execution and Delivery</p>
                 </div>
               </div>
             </div>
+            <div className="ml-auto px-6">
+              <div className="flex items-center gap-3">
+                <div className="px-3 py-1 bg-white/20 rounded-full">
+                  <span className="text-sm font-medium">OnTrack Assistant</span>
+                </div>
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              </div>
+            </div>
           </header>
-          <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+          <div className="flex flex-col h-[calc(100vh-4rem)] bg-gradient-to-br from-gray-50 to-blue-50">
             <div className="flex-1 overflow-y-auto">
               {messages.length > 0 ? (
                 <ChatMessages messages={messages} isStreaming={isStreaming} />
@@ -154,8 +161,8 @@ function App() {
               )}
               <div ref={messagesEndRef} />
             </div>
-            <div className="w-full mx-auto max-w-md sm:max-w-xl md:max-w-2xl lg:max-w-3xl mb-4">
-              <div className="flex flex-col items-center gap-2">
+            <div className="w-full mx-auto max-w-md sm:max-w-xl md:max-w-2xl lg:max-w-3xl mb-6">
+              <div className="flex flex-col items-center gap-3">
                 <ChatInput
                   handleSubmit={handleSubmit}
                   isStreaming={isStreaming}
@@ -163,7 +170,8 @@ function App() {
                   inputText={inputText}
                   setInputText={setInputText}
                 />
-                <p className="text-muted-foreground text-xs">
+                <p className="text-muted-foreground text-xs flex items-center gap-1">
+                  <span className="w-1 h-1 bg-blue-400 rounded-full"></span>
                   AI can make mistakes. Check important info.
                 </p>
               </div>
