@@ -30,13 +30,13 @@ export default function ChatPrompts({ onQuizClick }: ChatPromptsProps) {
           <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
             <MessageCircle className="h-12 w-12 text-white" />
           </div>
-          <motion.div
+          {/* <motion.div
             className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center"
             animate={{ rotate: [0, 10, -10, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
             <Zap className="h-4 w-4 text-yellow-800" />
-          </motion.div>
+          </motion.div> */}
         </div>
         
         <h1 className="text-5xl font-bold mb-4">
