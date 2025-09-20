@@ -24,7 +24,7 @@ fi
 
 echo "Starting AI Tutor RAG system optimized for Apple Silicon M4 Max..."
 echo "Using MPS acceleration for embeddings and Ollama for LLM inference"
-echo "Available at http://localhost:8001"
+echo "Available at http://localhost:8002"
 
-# Start the RAG pipeline
-python rag_single_query.py
+# Start the RAG pipeline - using the Mac-compatible multi-turn version
+python rag_multi_query_local.py
